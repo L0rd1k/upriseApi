@@ -5,17 +5,15 @@ import (
 	"net/http"
 
 	"github.com/L0rd1k/uprise-api/experimental/containers/lists/array"
+	"github.com/L0rd1k/uprise-api/experimental/containers/utils"
 )
 
-type CustomTestStruct struct {
-	name float64
-	arr  []int
-}
-
 func main() {
-	myList := array.New("One", "Two", "Three")
-	myList.Insert(4, "1", "2")
-	fmt.Println(myList.ToString())
+	tstArray := array.New("Flone", "Apple", "Diving", "Bucket")
+	fmt.Println(tstArray.ToString())
+	tstArray.Sort(utils.Comparator_String)
+
+	fmt.Println("\n", tstArray.ToString())
 	// fmt.Println(myList)
 	// http.HandleFunc("/", customHandler)
 	// log.Fatal(http.ListenAndServe(":8080", nil))

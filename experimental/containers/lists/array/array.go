@@ -1,73 +1,61 @@
 package array
 
-// +	Get(index int) (interface{}, bool)
-// +	Remove(index int)
-// +	Add(elements ...interface{})
-// +	Contains(elements ...interface{}) bool
-// +	Swap(index_1, index_2 int)
-// Insert(index int, elements ...interface{})
-// Set(index int, element interface{})
-// +	Empty() bool
-// +	Size() int
-// + 	Clear()
-// +	List() []interface{}
-// +	ToString() string
-
 import (
-	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/L0rd1k/uprise-api/experimental/containers/utils"
 )
 
-type List struct {
+type Array struct {
 	elements []interface{}
 	size     int
 }
 
-func New(elements ...interface{}) *List {
-	list := &List{}
+func New(elements ...interface{}) *Array {
+	array := &Array{}
 	if len(elements) > 0 {
-		list.Add(elements...)
+		array.Add(elements...)
 	}
-	return list
+	return array
 }
 
 // ============================================================
 
 // Add element to the list
-func (list *List) Add(elements ...interface{}) {
-	list.growCapacity(len(elements))
+func (array *Array) Add(elements ...interface{}) {
+	array.growCapacity(len(elements))
 	for _, elem := range elements {
-		list.elements[list.size] = elem
-		list.size++
+		array.elements[array.size] = elem
+		array.size++
 	}
 }
 
 // Receive element from the list
-func (list *List) Get(index int) (interface{}, bool) {
-	if !list.inRange(index) { // Check if index in range of list
+func (array *Array) Get(index int) (interface{}, bool) {
+	if !array.inRange(index) { // Check if index in range of list
 		return nil, false
 	}
-	return list.elements[index], true
+	return array.elements[index], true
 }
 
 // Remove element by index
-func (list *List) Remove(index int) bool {
-	if !list.inRange(index) {
+func (array *Array) Remove(index int) bool {
+	if !array.inRange(index) {
 		return false
 	}
-	list.elements[index] = nil                                    // Clean reference
-	copy(list.elements[index:], list.elements[index+1:list.size]) // shift to the left by one
-	list.size--
-	list.shrink()
+	array.elements[index] = nil                                      // Clean reference
+	copy(array.elements[index:], array.elements[index+1:array.size]) // shift to the left by one
+	array.size--
+	array.shrink()
 	return true
 }
 
 // Find elements in the list
-func (list *List) Contains(elements ...interface{}) bool {
+func (array *Array) Contains(elements ...interface{}) bool {
 	for _, searchValue := range elements {
 		found := false
-		for _, element := range list.elements {
+		for _, element := range array.elements {
 			if element == searchValue {
 				found = true
 				break
@@ -81,18 +69,18 @@ func (list *List) Contains(elements ...interface{}) bool {
 }
 
 // Return all elements from the list
-func (list *List) List() []interface{} {
-	newElements := make([]interface{}, list.size, list.size)
-	copy(newElements, list.elements[:list.size])
+func (array *Array) List() []interface{} {
+	newElements := make([]interface{}, array.size, array.size)
+	copy(newElements, array.elements[:array.size])
 	return newElements
 }
 
 // Return index of given element
-func (list *List) IndexOf(element interface{}) int {
-	if list.size == 0 {
+func (array *Array) IndexOf(element interface{}) int {
+	if array.size == 0 {
 		return -1
 	}
-	for index, value := range list.elements {
+	for index, value := range array.elements {
 		if value == element {
 			return index
 		}
@@ -101,87 +89,93 @@ func (list *List) IndexOf(element interface{}) int {
 }
 
 // Check if list is empty
-func (list *List) Empty() bool {
-	return list.size == 0
+func (array *Array) Empty() bool {
+	return array.size == 0
 }
 
 // Number of elements in the list.
-func (list *List) Size() int {
-	return list.size
+func (array *Array) Size() int {
+	return array.size
 }
 
 // Remove all elements from the list
-func (list *List) Clear() {
-	list.size = 0
-	list.elements = []interface{}{}
+func (array *Array) Clear() {
+	array.size = 0
+	array.elements = []interface{}{}
 }
 
 // Exchange position of two list's elements
-func (list *List) Swap(i, j int) {
-	if list.inRange(i) && list.inRange(j) {
-		list.elements[i], list.elements[j] = list.elements[j], list.elements[i]
+func (array *Array) Swap(i, j int) {
+	if array.inRange(i) && array.inRange(j) {
+		array.elements[i], array.elements[j] = array.elements[j], array.elements[i]
 	}
 }
 
 // Paste element to the given position
-func (list *List) Insert(index int, elements ...interface{}) bool {
-	list.growCapacity(len(elements))
-	if !list.inRange(index) {
-		fmt.Println(errors.New("error : out of range"))
+func (array *Array) Insert(index int, elements ...interface{}) bool {
+	array.growCapacity(len(elements))
+	if !array.inRange(index) {
 		return false
 	}
-	copy(list.elements[index+len(elements):], list.elements[index:list.size])
+	copy(array.elements[index+len(elements):], array.elements[index:array.size])
 	count := 0
 	for _, elem := range elements {
-		list.elements[index+count] = elem
+		array.elements[index+count] = elem
 		count++
-		list.size++
+		array.size++
 	}
 	return true
 }
 
 // Change value by index
-func (list *List) Set(index int, value interface{}) bool {
-	if !list.inRange(index) {
+func (array *Array) Set(index int, value interface{}) bool {
+	if !array.inRange(index) {
 		return false
 	}
-	list.elements[index] = value
+	array.elements[index] = value
 	return true
+}
+
+func (array *Array) Sort(comparator utils.Comparator) {
+	if len(array.elements) < 2 {
+		return
+	}
+	utils.Sort(array.elements[:array.size], comparator)
 }
 
 // ============================================================
 
-func (list *List) inRange(index int) bool {
-	return index >= 0 && index <= list.size
+func (array *Array) inRange(index int) bool {
+	return index >= 0 && index <= array.size
 }
 
 // Expand the array if necessary
-func (list *List) growCapacity(n int) {
-	currentCapacity := cap(list.elements)
-	if list.size+n >= currentCapacity {
+func (array *Array) growCapacity(n int) {
+	currentCapacity := cap(array.elements)
+	if array.size+n >= currentCapacity {
 		newCapacity := int(2.0 * float32(currentCapacity+n))
-		list.resize(newCapacity)
+		array.resize(newCapacity)
 	}
 }
 
 // Shrink when size is 25% of capacity
-func (list *List) shrink() {
-	currentCapacity := cap(list.elements)
-	if list.size <= int(float32(currentCapacity)*0.25) {
-		list.resize(list.size)
+func (array *Array) shrink() {
+	currentCapacity := cap(array.elements)
+	if array.size <= int(float32(currentCapacity)*0.25) {
+		array.resize(array.size)
 	}
 }
 
-func (list *List) resize(capacity int) {
+func (array *Array) resize(capacity int) {
 	newElements := make([]interface{}, capacity, capacity)
-	copy(newElements, list.elements)
-	list.elements = newElements
+	copy(newElements, array.elements)
+	array.elements = newElements
 }
 
-func (list *List) ToString() string {
+func (array *Array) ToString() string {
 	var str = ""
 	items := []string{}
-	for _, value := range list.elements[:list.size] {
+	for _, value := range array.elements[:array.size] {
 		items = append(items, fmt.Sprintf("%v", value))
 	}
 	str += strings.Join(items, "\n")
