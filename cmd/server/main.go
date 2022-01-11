@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 
-	singlelinkedlist "github.com/L0rd1k/uprise-api/experimental/containers/lists/single_linked_list"
+	"github.com/L0rd1k/uprise-api/cmd/api"
 )
 
 func main() {
@@ -17,15 +16,12 @@ func main() {
 	***/
 
 	/*** SINGLE-LINKED-LIST
+		tstList := singlelinkedlist.New("One", "Two", "Three", "Four")
+		tstList.Remove(3)
+		fmt.Println(tstList.ToString())
+		fmt.Println(myList)
 	***/
-	tstList := singlelinkedlist.New("One", "Two", "Three", "Four")
-	tstList.Remove(3)
-	fmt.Println(tstList.ToString())
-	// fmt.Println(myList)
-	// http.HandleFunc("/", customHandler)
-	// log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func customHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "<h1>%s</h1><div>%s</div>", "My Title", "My Body")
+	tst_api := api.NewApi()
+	fmt.Println(tst_api)
+	fmt.Printf("Check function!")
 }
