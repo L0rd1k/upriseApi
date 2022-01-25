@@ -1,6 +1,8 @@
 package api
 
-import "net/http"
+import (
+	"net/http"
+)
 
 type Api struct {
 	stack []Middleware
@@ -34,4 +36,9 @@ func (api *Api) MakeHandler() http.Handler {
 			WrapMiddlewares(api.stack, appFunc),
 		),
 	)
+}
+
+var DefaultCommonStack = []Middleware{
+	&TimerMiddleware{},
+	&RecorderMiddleware{},
 }
