@@ -26,7 +26,6 @@ func TestSingleLinkedList() {
 
 func TestDemo() {
 	tst_api := api.NewApi()
-	fmt.Println(tst_api)
 	tst_api.Use(api.DefaultCommonStack...)
 	tst_api.SetApp(api.AppSimple(func(w api.ResponseWriter, r *api.Request) {
 		w.WriteJson(map[string]string{"Body": "Hello World!"})
