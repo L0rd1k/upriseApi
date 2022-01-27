@@ -1,0 +1,5 @@
+[MAIN]
+version = 1.0.0
+
+[CHANNELS]
+dms = "_ver0.us"
