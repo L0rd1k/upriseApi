@@ -2,6 +2,7 @@ package api
 
 import (
 	"bufio"
+	"fmt"
 	"net"
 	"net/http"
 )
@@ -15,6 +16,7 @@ type recorderResponseWriter struct {
 }
 
 func (rm *RecorderMiddleware) MiddlewareFunc(handler HandlerFunc) HandlerFunc {
+	fmt.Println("--> <RecorderMiddleware:MiddlewareFunc>")
 	return func(w ResponseWriter, r *Request) {
 		writer := &recorderResponseWriter{w, 0, false, 0}
 		handler(writer, r)

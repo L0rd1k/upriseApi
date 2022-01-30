@@ -5,6 +5,58 @@ import (
 	"fmt"
 )
 
+type Match struct {
+	Route  interface{}
+	Params map[string]string
+}
+
+type paramMatch struct {
+	name  string
+	value string
+}
+
+func New() *Trie {
+	return &Trie{
+		root: &Node{},
+	}
+}
+
+func newFindContext() *findContext {
+	return &findContext{
+		paramStack: []paramMatch{},
+	}
+}
+
+//--------------------------------------------------------------------------------------------
+
+type findContext struct {
+	paramStack []paramMatch
+	matchFunc  func(httpMethod, path string, node *Node)
+}
+
+func (fc *findContext) paramsAsMap() map[string]string {
+	r := map[string]string{}
+	for _, param := range fc.paramStack {
+		if r[param.name] != "" {
+			panic(fmt.Sprintf(
+				"Placeholder %s already found, placeholder names should be unique per route", param.name,
+			))
+		}
+		r[param.name] = param.value
+	}
+	return r
+}
+
+func (fc *findContext) pushParams(name, value string) {
+	fc.paramStack = append(fc.paramStack, paramMatch{name, value})
+}
+
+func (fc *findContext) popParams() {
+	fc.paramStack = fc.paramStack[:len(fc.paramStack)-1]
+}
+
+//--------------------------------------------------------------------------------------------
+
 type Node struct {
 	HttpMethodToRoute map[string]interface{}
 	Children          map[string]*Node
@@ -16,16 +68,6 @@ type Node struct {
 	ParamName      string
 	RelaxedName    string
 	SplatName      string
-}
-
-type Trie struct {
-	root *Node
-}
-
-func New() *Trie {
-	return &Trie{
-		root: &Node{},
-	}
 }
 
 func (nd *Node) addRoute(httpMethod, pathExp string, route interface{}, usedParams []string) error {
@@ -154,7 +196,49 @@ func (nd *Node) compress() {
 	}
 }
 
+func (nd *Node) find(httpMethod, path string, context *findContext) {
+	if nd.HttpMethodToRoute != nil && path == "" {
+		context.matchFunc(httpMethod, path, nd)
+	}
+	if len(path) == 0 {
+		return
+	}
+
+	if nd.SplatChild != nil {
+		context.pushParams(nd.SplatName, path)
+		nd.SplatChild.find(httpMethod, "", context)
+		context.popParams()
+	}
+
+	if nd.ParamChild != nil {
+		value, remaining := splitParam(path)
+		context.pushParams(nd.ParamName, value)
+		nd.ParamChild.find(httpMethod, remaining, context)
+		context.popParams()
+	}
+
+	if nd.RelaxedChild != nil {
+		value, remaining := splitRelaxed(path)
+		context.pushParams(nd.RelaxedName, value)
+		nd.RelaxedChild.find(httpMethod, remaining, context)
+		context.popParams()
+	}
+	length := nd.ChildrenKeyLen
+	if len(path) < length {
+		return
+	}
+	token := path[0:length]
+	remaining := path[length:]
+	if nd.Children[token] != nil {
+		nd.Children[token].find(httpMethod, remaining, context)
+	}
+}
+
 //--------------------------------------------------------------------------------------------
+
+type Trie struct {
+	root *Node
+}
 
 func (t *Trie) AddRoute(httpMethod, pathExp string, route interface{}) error {
 	return t.root.addRoute(httpMethod, pathExp, route, []string{})
@@ -162,6 +246,23 @@ func (t *Trie) AddRoute(httpMethod, pathExp string, route interface{}) error {
 
 func (t *Trie) Compress() {
 	t.root.compress()
+}
+
+func (t *Trie) FindRoutesAndPathMatched(httpMethod, path string) ([]*Match, bool) {
+	context := newFindContext()
+	pathMatched := false
+	matches := []*Match{}
+	context.matchFunc = func(httpMethod, path string, node *Node) {
+		pathMatched = true
+		if node.HttpMethodToRoute[httpMethod] != nil {
+			matches = append(matches, &Match{
+				Route:  node.HttpMethodToRoute[httpMethod],
+				Params: context.paramsAsMap(),
+			})
+		}
+	}
+	t.root.find(httpMethod, path, context)
+	return matches, pathMatched
 }
 
 //--------------------------------------------------------------------------------------------

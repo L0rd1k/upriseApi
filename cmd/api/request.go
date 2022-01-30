@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -18,10 +19,12 @@ type Request struct {
 }
 
 func (rqst *Request) PathParam(name string) string {
+	fmt.Println("<Request:PathParam>:", name)
 	return rqst.PathParams[name]
 }
 
 func (rqst *Request) DecodeJsonPayload(v interface{}) error {
+	fmt.Println("<Request:DecodeJsonPayload>")
 	content, err := ioutil.ReadAll(rqst.Body)
 	rqst.Body.Close()
 	if err != nil {
@@ -38,16 +41,21 @@ func (rqst *Request) DecodeJsonPayload(v interface{}) error {
 }
 
 func (rqst *Request) BaseUrl() *url.URL {
-	scheme := rqst.URL.Scheme
+	fmt.Println("<Request:BaseUrl>")
+	scheme := rqst.URL.Scheme //> Define current Scheme
+	fmt.Println("	<Request:BaseUrl>:scheme", scheme)
 	if scheme == "" {
 		scheme = "http"
 	} else if scheme == "http" && rqst.TLS != nil {
 		scheme = "https"
 	}
 	host := rqst.Host
+	fmt.Println("	<Request:BaseUrl>:host", host)
+
 	if len(host) > 0 && host[len(host)-1] == '/' {
 		host = host[:len(host)-1]
 	}
+	fmt.Println("	<Request:BaseUrl>:host", host)
 
 	return &url.URL{
 		Scheme: scheme,
@@ -56,6 +64,7 @@ func (rqst *Request) BaseUrl() *url.URL {
 }
 
 func (rqst *Request) UrlFor(path string, queryParams map[string][]string) *url.URL {
+	fmt.Println("<Request:UrlFor>")
 	baseUrl := rqst.BaseUrl()
 	baseUrl.Path = path
 	if queryParams != nil {
@@ -82,6 +91,7 @@ type CorsInfo struct {
 }
 
 func (rqst *Request) GetCorsInfo() *CorsInfo {
+	fmt.Println("<Request:GetCorsInfo>")
 	origin := rqst.Header.Get("Origin")
 	var originUrl *url.URL
 	var isCors bool
