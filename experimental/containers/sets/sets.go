@@ -9,5 +9,4 @@ type Set interface {
 	Clear()
 	List() []interface{} // slice of interfaces
 	ToString() string
-	// containers.Containers // general methods to use
 }

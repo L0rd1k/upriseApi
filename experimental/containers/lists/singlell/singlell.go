@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/L0rd1k/uprise-api/experimental/containers/lists"
 	"github.com/L0rd1k/uprise-api/experimental/containers/utils"
 )
 
@@ -18,7 +19,7 @@ type SingleList struct {
 	size int
 }
 
-//=============================================================
+var _ lists.List = (*SingleList)(nil)
 
 func New(elements ...interface{}) *SingleList {
 	list := &SingleList{}
@@ -27,8 +28,6 @@ func New(elements ...interface{}) *SingleList {
 	}
 	return list
 }
-
-//=============================================================
 
 func (list *SingleList) Add(elements ...interface{}) {
 	for _, value := range elements {
@@ -176,26 +175,27 @@ func (list *SingleList) Swap(val_1, val_2 int) {
 	}
 }
 
-func (list *SingleList) Set(index int, value interface{}) {
+func (list *SingleList) Set(index int, value interface{}) bool {
 	if !list.inRange(index) {
 		if index == list.size {
 			list.Add(value)
 		}
-		return
+		return false
 	}
 	foundElement := list.head
 	for i := 0; i != index; {
 		i, foundElement = i+1, foundElement.next
 	}
 	foundElement.value = value
+	return true
 }
 
-func (list *SingleList) Insert(index int, elements ...interface{}) {
+func (list *SingleList) Insert(index int, elements ...interface{}) bool {
 	if !list.inRange(index) {
 		if index == list.size {
 			list.Add(elements...)
 		}
-		return
+		return false
 	}
 	list.size += len(elements)
 	var prevElement *Node
@@ -224,6 +224,7 @@ func (list *SingleList) Insert(index int, elements ...interface{}) {
 		}
 		prevElement.next = oldNextElement
 	}
+	return true
 }
 
 //=============================================================

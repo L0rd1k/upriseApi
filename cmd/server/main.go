@@ -1,30 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"net/http"
 
 	"github.com/L0rd1k/uprise-api/cmd/api"
 	"github.com/L0rd1k/uprise-api/cmd/api/router"
-	"github.com/L0rd1k/uprise-api/experimental/containers/lists/array"
-	"github.com/L0rd1k/uprise-api/experimental/containers/lists/singlell"
-	"github.com/L0rd1k/uprise-api/experimental/containers/utils"
+	"github.com/L0rd1k/uprise-api/test"
 )
-
-func TestArray() {
-	tstArray := array.New("Flone", "Apple", "Diving", "Bucket")
-	fmt.Println(tstArray.ToString())
-	tstArray.Sort(utils.Comparator_String)
-	fmt.Println("\n", tstArray.ToString())
-}
-
-func TestSingleLinkedList() {
-	tstList := singlell.New("One", "Two", "Three", "Four")
-	tstList.Remove(3)
-	fmt.Println(tstList.ToString())
-}
 
 func TestDemo() {
 	tst_api := api.NewApi()
@@ -61,6 +45,8 @@ func TestDemoPlaceholder() {
 }
 
 func main() {
+	test.TestArrayStack()
+	// test.TestArray()
 	// TestDemoPlaceholder()
-	TestDemo()
+	// TestDemo()
 }

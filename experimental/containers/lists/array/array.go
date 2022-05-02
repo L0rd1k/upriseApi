@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/L0rd1k/uprise-api/experimental/containers/lists"
 	"github.com/L0rd1k/uprise-api/experimental/containers/utils"
 )
 
@@ -12,6 +13,8 @@ type Array struct {
 	size     int
 }
 
+var _ lists.List = (*Array)(nil)
+
 func New(elements ...interface{}) *Array {
 	array := &Array{}
 	if len(elements) > 0 {
@@ -19,8 +22,6 @@ func New(elements ...interface{}) *Array {
 	}
 	return array
 }
-
-// ============================================================
 
 // Add element to the list
 func (array *Array) Add(elements ...interface{}) {
@@ -142,8 +143,6 @@ func (array *Array) Sort(comparator utils.Comparator) {
 	}
 	utils.Sort(array.elements[:array.size], comparator)
 }
-
-// ============================================================
 
 func (array *Array) inRange(index int) bool {
 	return index >= 0 && index <= array.size

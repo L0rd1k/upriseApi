@@ -3,11 +3,15 @@ package hashset
 import (
 	"fmt"
 	"strings"
+
+	"github.com/L0rd1k/uprise-api/experimental/containers/sets"
 )
 
 type Set struct {
 	elements map[interface{}]struct{}
 }
+
+var _ sets.Set = (*Set)(nil)
 
 var itemExists = struct{}{} // New struct{} instance
 
