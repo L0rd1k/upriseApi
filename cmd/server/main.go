@@ -45,7 +45,8 @@ func TestDemoPlaceholder() {
 }
 
 func main() {
-	test.TestArrayStack()
+	test.TestCircleQueue()
+	// test.TestArrayStack()
 	// test.TestArray()
 	// TestDemoPlaceholder()
 	// TestDemo()
