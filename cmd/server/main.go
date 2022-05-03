@@ -7,7 +7,7 @@ import (
 
 	"github.com/L0rd1k/uprise-api/cmd/api"
 	"github.com/L0rd1k/uprise-api/cmd/api/router"
-	"github.com/L0rd1k/uprise-api/test"
+	"github.com/L0rd1k/uprise-api/torrent/tor"
 )
 
 func TestDemo() {
@@ -45,9 +45,9 @@ func TestDemoPlaceholder() {
 }
 
 func main() {
-	test.TestCircleQueue()
-	// test.TestArrayStack()
-	// test.TestArray()
-	// TestDemoPlaceholder()
-	// TestDemo()
+	torFile, err := tor.Open("D:/CP.torrent")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = torFile.SaveToFile("D:/")
 }
