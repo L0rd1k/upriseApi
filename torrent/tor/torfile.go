@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/L0rd1k/uprise-api/torrent/p2p"
 	"github.com/jackpal/bencode-go"
 )
 
@@ -106,14 +107,32 @@ func Open(fileName string) (Torrent, error) {
 
 func (tor *Torrent) SaveToFile(fileName string) error {
 	var id [peerSize]byte
-	_, error := rand.Read(id[:])
-	if error != nil {
-		return error
+	_, err := rand.Read(id[:])
+	if err != nil {
+		return err
 	}
-	peers, error := tor.requestPeers(id, uint16(localPort))
+
+	peers, err := tor.requestPeers(id, uint16(localPort))
 	fmt.Println("Peers count: ", len(peers))
 	for i := 0; i < len(peers); i++ {
 		fmt.Println(peers[i].String())
 	}
-	return error
+
+	if err != nil {
+		return err
+	}
+
+	torrent := p2p.Torrent{
+		Peers:       peers,
+		PeerId:      id,
+		InfoHash:    tor.InfoHash,
+		PieceHashes: tor.InfoPieceHashes,
+		PieceLength: tor.InfoPieceLength,
+		Length:      tor.InfoLength,
+		Name:        tor.InfoName,
+	}
+
+	_, err = torrent.Download()
+
+	return err
 }
