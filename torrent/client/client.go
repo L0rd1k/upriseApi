@@ -24,7 +24,7 @@ type Client struct {
 
 func New(peer peer.Peer, peerId, infoHash [20]byte) (*Client, error) {
 	//> Set tcp connection timout 3 Seconds
-	connection, err := net.DialTimeout("tcp", peer.String(), 3*time.Second)
+	connection, err := net.DialTimeout("tcp", peer.String(), 20*time.Second)
 	if err != nil {
 		log.Fatal("Error set tcp connection timeout")
 		return nil, err
@@ -92,7 +92,43 @@ func performHandshake(connection net.Conn, infoHash, peerId [20]byte) (*handshak
 	}
 	// Make sure that hashes are equal
 	if !bytes.Equal(response.InfoHash[:], infoHash[:]) {
-		return nil, fmt.Errorf("Info hashes not equal")
+		return nil, fmt.Errorf("info hashes not equal")
 	}
 	return response, nil
+}
+
+func (c *Client) Read() (*msg.Message, error) {
+	//> Read message from the connection
+	message, err := msg.Read(c.Connection)
+	return message, err
+}
+
+func (c *Client) SendRequest(index, begin, length int) error {
+	request := msg.FormatRequest(index, begin, length)
+	_, err := c.Connection.Write(request.Serialize())
+	return err
+}
+
+func (c *Client) SendInterested() error {
+	msg := msg.Message{Id: msg.MsgInterested}
+	_, err := c.Connection.Write(msg.Serialize())
+	return err
+}
+
+func (c *Client) SendNotInterested() error {
+	msg := msg.Message{Id: msg.MsgNotInterested}
+	_, err := c.Connection.Write(msg.Serialize())
+	return err
+}
+
+func (c *Client) SendUnchoke() error {
+	msg := msg.Message{Id: msg.MsgUnchoke}
+	_, err := c.Connection.Write(msg.Serialize())
+	return err
+}
+
+func (c *Client) SendHave(index int) error {
+	msg := msg.FormatHave(index)
+	_, err := c.Connection.Write(msg.Serialize())
+	return err
 }

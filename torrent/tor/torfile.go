@@ -132,7 +132,18 @@ func (tor *Torrent) SaveToFile(fileName string) error {
 		Name:        tor.InfoName,
 	}
 
-	_, err = torrent.Download()
-
-	return err
+	buffer, err := torrent.Download()
+	if err != nil {
+		return err
+	}
+	outFile, err := os.Create(fileName)
+	if err != nil {
+		return err
+	}
+	defer outFile.Close()
+	_, err = outFile.Write(buffer)
+	if err != nil {
+		return err
+	}
+	return nil
 }

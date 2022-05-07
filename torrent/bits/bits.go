@@ -2,7 +2,7 @@ package bits
 
 type Bits []byte //> pieces of peers
 
-func (bitField Bits) hasBit(idx int) bool {
+func (bitField Bits) HasBit(idx int) bool {
 	byteIdx := idx / 8
 	offset := byteIdx % 8
 	if byteIdx < 0 || byteIdx >= len(bitField) {
@@ -11,7 +11,7 @@ func (bitField Bits) hasBit(idx int) bool {
 	return bitField[byteIdx]>>uint(7-offset)&1 != 0
 }
 
-func (bitField Bits) setBit(idx int) {
+func (bitField Bits) SetBit(idx int) {
 	byteIdx := idx / 8
 	offset := idx % 8
 	if byteIdx < 0 || byteIdx >= len(bitField) {

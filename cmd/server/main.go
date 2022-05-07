@@ -45,9 +45,12 @@ func TestDemoPlaceholder() {
 }
 
 func main() {
-	torFile, err := tor.Open("D:/CP.torrent")
+	torFile, err := tor.Open("D:/Test2.torrent")
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = torFile.SaveToFile("D:/")
+	err = torFile.SaveToFile("D:/Test2.pdf")
+	if err != nil {
+		log.Fatal(err)
+	}
 }
